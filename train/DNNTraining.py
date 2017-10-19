@@ -2,7 +2,7 @@ import os
 import tensorflow as tf
 import pickle
 import numpy as np
-import nltk
+
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
@@ -106,7 +106,7 @@ def trainDNN(x):
                 test_y = np.array(labels)
                 print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
-#trainDNN(x)
+trainDNN(x)
 
 def testDNN():
     csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
