@@ -40,6 +40,7 @@ def neural_network(daten):
 
 saver = tf.train.Saver()
 tf_log = 'tf.log'
+lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pickle')
 
 def trainDNN(x):
     csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
@@ -58,7 +59,7 @@ def trainDNN(x):
             if epoche != 1:
                 saver.restore(sess,"model.ckpt")
             epoch_loss = 1
-            with open('lexikon.pickle','rb') as f:
+            with open(lexiconfile,'rb') as f:
                     lexikon = pickle.load(f)
             with open(csv_file_1,buffering=20000,encoding='latin-1') as f:
                 zaehler = 0
@@ -147,7 +148,7 @@ testDNN()
 
 def useDNN(input_data):
     prediction = neural_network(x)
-    with open('lexikon.pickle','rb') as f:
+    with open(lexiconfile,'rb') as f:
         lexikon = pickle.load(f)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
