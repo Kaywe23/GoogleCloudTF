@@ -45,7 +45,7 @@ tf_log = 'tf.log'
 def trainDNN(x):
     csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
     csv_file_2 = os.path.join(FLAGS.input_dir,  'vector_test_converted.csv')
-    lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pickle')
+    lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pkl')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
