@@ -113,7 +113,7 @@ def trainDNN(x):
 
 
 def main(_):
-  trainDNN(x)
+  #trainDNN(x)
 
 
 if __name__ == '__main__':
@@ -121,14 +121,17 @@ if __name__ == '__main__':
 
 
 def testDNN():
-    csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
-    csv_file_2 = os.path.join(FLAGS.input_dir,  'vector_test_converted.csv')
+    csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
+    csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
+    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
+  
     prediction = neural_network(x)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoche in range(epochen):
             try:
-                saver.restore(sess, "model.ckpt")
+                saver.restore(sess, model)
             except Exception as e:
                 print(str(e))
             epoch_loss=0
@@ -155,10 +158,11 @@ def testDNN():
             test_y = np.array(labels)
             print('Accuracy:',accuracy.eval({x:test_x, y: test_y}))
 
-#testDNN()
+testDNN()
 
 def useDNN(input_data):
-    lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pickle')
+    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     with open(lexiconfile,'rb') as f:
         lexikon = pickle.load(f)
