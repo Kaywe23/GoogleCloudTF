@@ -2,6 +2,12 @@ import os
 import tensorflow as tf
 import pickle
 import numpy as np
+import logging
+import os
+import cloudstorage as gcs
+import webapp2
+
+from google.appengine.api import app_identity
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -9,7 +15,7 @@ lemmatizer = WordNetLemmatizer()
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_string('input_dir', 'input',  'Input Directory')
+flags.DEFINE_string('input_dir', 'input', 'Input Directory')
 
 nodes_hidden1 = 500
 nodes_hidden2 = 500
@@ -30,6 +36,7 @@ hidden_layer2 = {'f_fum':nodes_hidden2,'weight':tf.Variable(tf.random_normal([no
 output_layer = {'f_fum':None,'weight':tf.Variable(tf.random_normal([nodes_hidden2, klassen])),
                                                                     'bias':tf.Variable(tf.random_normal([klassen])),}
 
+  
 def neural_network(daten):
     l1 = tf.add(tf.matmul(daten,hidden_layer1['weight']), hidden_layer1['bias'])
     l1 = tf.nn.relu(l1)
@@ -46,6 +53,7 @@ def trainDNN(x):
     csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
     csv_file_2 = os.path.join(FLAGS.input_dir,  'vector_test_converted.csv')
     lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pkl')
+    model = os.path.join(FLAGS.input_dir,  'model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
@@ -58,7 +66,7 @@ def trainDNN(x):
             epoche = 1
         while epoche <= epochen:
             if epoche != 1:
-                saver.restore(sess,"model.ckpt")
+                saver.restore(sess, model)
             epoch_loss = 1
             with open(lexiconfile,'rb') as f:
                     lexikon = pickle.load(f)
@@ -82,7 +90,7 @@ def trainDNN(x):
                     epoch_loss += c
                     if zaehler < datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
-                saver.save(sess, "model.ckpt")
+                saver.save(sess, model)
                 print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:',epoch_loss)
                 
                 with open(tf_log,'a') as f:
@@ -108,7 +116,14 @@ def trainDNN(x):
                 test_y = np.array(labels)
                 print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
-#trainDNN(x)
+
+def main(_):
+  trainDNN(x)
+
+
+if __name__ == '__main__':
+    tf.app.run()
+
 
 def testDNN():
     csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
@@ -145,7 +160,7 @@ def testDNN():
             test_y = np.array(labels)
             print('Accuracy:',accuracy.eval({x:test_x, y: test_y}))
 
-testDNN()
+#testDNN()
 
 def useDNN(input_data):
     lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pickle')
