@@ -25,7 +25,7 @@ y = tf.placeholder('float')
 
 aktuelle_epoche = tf.Variable(1)
 
-hidden_layer1 = {'f_fum':nodes_hidden1,'weight':tf.Variable(tf.random_normal([2564, nodes_hidden1])),
+hidden_layer1 = {'f_fum':nodes_hidden1,'weight':tf.Variable(tf.random_normal([2638, nodes_hidden1])),
                                                                     'bias':tf.Variable(tf.random_normal([nodes_hidden1]))}
 hidden_layer2 = {'f_fum':nodes_hidden2,'weight':tf.Variable(tf.random_normal([nodes_hidden1,nodes_hidden2])),
                                                                     'bias':tf.Variable(tf.random_normal([nodes_hidden2]))}
