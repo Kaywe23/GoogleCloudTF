@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
 import pickle
+import cPickle
 import numpy as np
 import logging
 from tensorflow.python.lib.io import file_io
@@ -47,7 +48,7 @@ tf_log = 'tf.log'
 def trainDNN(x):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
-    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    lexiconfile= cPickle.loads(file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl'))
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
@@ -112,12 +113,12 @@ def trainDNN(x):
                 print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
 
-#def main(_):
-  #trainDNN(x)
+def main(_):
+  trainDNN(x)
 
 
-#if __name__ == '__main__':
- #   tf.app.run()
+if __name__ == '__main__':
+    tf.app.run()
 
 
 def testDNN():
@@ -158,7 +159,7 @@ def testDNN():
             test_y = np.array(labels)
             print('Accuracy:',accuracy.eval({x:test_x, y: test_y}))
 
-testDNN()
+#testDNN()
 
 def useDNN(input_data):
     lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
