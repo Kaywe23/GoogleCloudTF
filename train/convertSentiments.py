@@ -27,8 +27,8 @@ def convert(infile,outfile):
 			print(str(e))
 	out.close()
 
-convert('training.1600000.processed.noemoticon.csv','train_converted.csv')
-convert('testdata.manual.2009.06.14.csv','test_converted.csv')
+#convert('training.1600000.processed.noemoticon.csv','train_converted.csv')
+#convert('testdata.manual.2009.06.14.csv','test_converted.csv')
 
 
 def getLexikon(infile):
@@ -50,10 +50,10 @@ def getLexikon(infile):
 		except Exception as e:
 			print(str(e))
 
-	with open('lexikon.pkl','wb') as f:
-		pickle.dump(lexikon,f, protocol=2)
+	with open('lexikon.pickle','wb') as f:
+		pickle.dump(lexikon,f,  protocol=2)
 
-getLexikon('train_converted.csv')
+#getLexikon('train_converted.csv')
 
 
 def getVector(infile,outfile,lexikonpickle):
@@ -83,7 +83,7 @@ def getVector(infile,outfile,lexikonpickle):
 
 		print(zaehler)
 
-getVector('test_converted.csv','vector_test_converted.csv','lexikon.pickle')
+#getVector('test_converted.csv','vector_test_converted.csv','lexikon.pickle')
 
 
 def datenVermischen(infile):
@@ -92,7 +92,7 @@ def datenVermischen(infile):
 	print(d.head())
 	d.to_csv('train_converted_vermischt.csv', index=False)
 	
-datenVermischen('train_converted.csv')
+#datenVermischen('train_converted.csv')
 
 
 def testdatenAufbereiten(infile):
@@ -115,7 +115,9 @@ def testdatenAufbereiten(infile):
 	feature_sets = np.array(feature_sets)
 	labels = np.array(labels)
 
-testdatenAufbereiten('vector_test_converted.csv')
+#testdatenAufbereiten('vector_test_converted.csv')
 
-
+with open('lexikon.pickle', 'rb') as f:
+    lexicon = pickle.load(f)
+    print(len(lexicon))
 

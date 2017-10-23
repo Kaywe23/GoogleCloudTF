@@ -25,7 +25,7 @@ y = tf.placeholder('float')
 
 aktuelle_epoche = tf.Variable(1)
 
-hidden_layer1 = {'f_fum':nodes_hidden1,'weight':tf.Variable(tf.random_normal([2638, nodes_hidden1])),
+hidden_layer1 = {'f_fum':nodes_hidden1,'weight':tf.Variable(tf.random_normal([2564, nodes_hidden1])),
                                                                     'bias':tf.Variable(tf.random_normal([nodes_hidden1]))}
 hidden_layer2 = {'f_fum':nodes_hidden2,'weight':tf.Variable(tf.random_normal([nodes_hidden1,nodes_hidden2])),
                                                                     'bias':tf.Variable(tf.random_normal([nodes_hidden2]))}
@@ -48,7 +48,7 @@ tf_log = 'tf.log'
 def trainDNN(x):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
-    lexiconfile= cPickle.loads(file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl'))
+    lexiconfile= cPickle.loads(file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle'))
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 def testDNN():
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
-    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
   
     prediction = neural_network(x)
@@ -162,7 +162,7 @@ def testDNN():
 #testDNN()
 
 def useDNN(input_data):
-    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     with open(lexiconfile,'rb') as f:
