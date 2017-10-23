@@ -1,17 +1,16 @@
-import os.path
+import os
 import tensorflow as tf
 import pickle
 import numpy as np
 import logging
+from tensorflow.python.lib.io import file_io
 
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-flags.DEFINE_string('input_dir', 'input', 'Input Directory')
+
 
 nodes_hidden1 = 500
 nodes_hidden2 = 500
@@ -46,10 +45,10 @@ tf_log = 'tf.log'
 
 
 def trainDNN(x):
-    csv_file_1 = os.path.join(FLAGS.input_dir,  'train_converted_vermischt.csv')
-    csv_file_2 = os.path.join(FLAGS.input_dir,  'vector_test_converted.csv')
-    lexiconfile= os.path.join(FLAGS.input_dir,  'lexikon.pkl')
-    model = os.path.join(FLAGS.input_dir,  'model.ckpt')
+    csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt')
+    csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
+    lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
+    model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
