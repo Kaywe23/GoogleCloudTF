@@ -45,7 +45,7 @@ tf_log = 'tf.log'
 
 
 def trainDNN(x):
-    csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt')
+    csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
     lexiconfile=  file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pkl')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
