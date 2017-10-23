@@ -112,12 +112,12 @@ def trainDNN(x):
                 print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
 
-def main(_):
+#def main(_):
   #trainDNN(x)
 
 
-if __name__ == '__main__':
-    tf.app.run()
+#if __name__ == '__main__':
+ #   tf.app.run()
 
 
 def testDNN():
