@@ -72,7 +72,7 @@ def trainDNN(x):
             if epoche != 1:
                 saver.restore(sess, model)
             epoch_loss = 1
-            with file_io.FileIO(pickle_file,'r') as f:
+            with file_io.FileIO(pickle_file,'r+') as f:
                 if sys.version_info<(3, ):
                     lexikon=pickle.load(f)
                 else:
