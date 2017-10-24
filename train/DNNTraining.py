@@ -50,12 +50,13 @@ saver = tf.train.Saver()
 tf_log = 'tf.log'
 
 
-def trainDNN(x):
+def trainDNN(x,  pickle_file='train/lexicon.pickle', 
+                            job_dir='./tmp/DNNTraining',  **args):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
-    pickle_file='gs://machinelearning-dc-bucket/input/lexikon.pickle'
-    job_dir='./tmp/DNNTraining'
+   # pickle_file='gs://machinelearning-dc-bucket/input/lexikon.pickle'
+    
     # set the logging path for ML Engine logging to Storage bucket
     logs_path = job_dir + '/logs/' + datetime.now().isoformat()
     print('Using logs_path located at {}'.format(logs_path))
@@ -131,10 +132,13 @@ def trainDNN(x):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
+   '--pickle-file',  help='CSB training pickle')
+    parser.add_argument(
       '--job-dir',
       help='Cloud storage bucket to export the model and store temp files')
     args = parser.parse_args()
-    trainDNN(x)
+    arguments=args.__dict__
+    trainDNN(x, **arguments)
  
 
 
