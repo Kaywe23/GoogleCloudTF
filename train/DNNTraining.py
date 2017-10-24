@@ -3,6 +3,7 @@ import os
 import tensorflow as tf
 import pickle
 import sys
+import io
 from datetime import datetime
 import numpy as np
 import logging
@@ -77,7 +78,7 @@ def trainDNN(x):
                     lexikon=pickle.load(f)
                 else:
                     lexikon = pickle.load(f, encoding='bytes')
-            with open(csv_file_1,buffering=20000,encoding='latin-1') as f:
+            with io.open(csv_file_1,buffering=20000,encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
                     label = zeile.split(':::')[0]
