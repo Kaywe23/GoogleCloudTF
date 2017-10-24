@@ -1,10 +1,14 @@
+from __future__ import print_function
 import os
 import tensorflow as tf
 import pickle
-
+import sys
+from datetime import datetime
 import numpy as np
 import logging
 from tensorflow.python.lib.io import file_io
+
+import argparse
 
 
 from nltk.tokenize import word_tokenize
@@ -18,7 +22,7 @@ nodes_hidden2 = 500
 klassen = 2
 batchzahl = 32
 datenanzahl = 2000000
-epochen = 1
+epochen = 10
 
 x = tf.placeholder('float')
 y = tf.placeholder('float')
@@ -48,8 +52,12 @@ tf_log = 'tf.log'
 def trainDNN(x):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
-    lexiconfile= file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
+    pickle_file='gs://machinelearning-dc-bucket/input/lexikon.pickle'
+    job_dir='./tmp/DNNTraining'
+    # set the logging path for ML Engine logging to Storage bucket
+    logs_path = job_dir + '/logs/' + datetime.now().isoformat()
+    print('Using logs_path located at {}'.format(logs_path))
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
@@ -64,8 +72,11 @@ def trainDNN(x):
             if epoche != 1:
                 saver.restore(sess, model)
             epoch_loss = 1
-            with open(lexiconfile,'rb') as f:
-                    lexikon = pickle.load(f)
+            with file_io.FileIO(pickle_file,'rb') as f:
+                if sys.version_info<(3, ):
+                    lexikon=pickle.load(f)
+                else:
+                    lexikon = pickle.load(f, encoding='bytes')
             with open(csv_file_1,buffering=20000,encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
@@ -113,12 +124,20 @@ def trainDNN(x):
                 print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
 
 
-def main(_):
-  trainDNN(x)
+
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+      '--train-file',
+      help='Cloud Storage bucket or local path to training data')
+    parser.add_argument(
+      '--job-dir',
+      help='Cloud storage bucket to export the model and store temp files')
+    args = parser.parse_args()
+    trainDNN(x)
+ 
 
 
 def testDNN():
