@@ -72,7 +72,7 @@ def trainDNN(x):
             if epoche != 1:
                 saver.restore(sess, model)
             epoch_loss = 1
-            with file_io.FileIO(pickle_file,'rb') as f:
+            with file_io.FileIO(pickle_file,'r') as f:
                 if sys.version_info<(3, ):
                     lexikon=pickle.load(f)
                 else:
@@ -129,9 +129,6 @@ def trainDNN(x):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-      '--train-file',
-      help='Cloud Storage bucket or local path to training data')
     parser.add_argument(
       '--job-dir',
       help='Cloud storage bucket to export the model and store temp files')
