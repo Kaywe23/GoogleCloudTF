@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 import pickle
-import cPickle
+
 import numpy as np
 import logging
 from tensorflow.python.lib.io import file_io
@@ -48,7 +48,7 @@ tf_log = 'tf.log'
 def trainDNN(x):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
-    lexiconfile= cPickle.loads(file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle'))
+    lexiconfile= file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/lexikon.pickle')
     model = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
