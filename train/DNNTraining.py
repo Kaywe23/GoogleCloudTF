@@ -132,9 +132,9 @@ def trainDNN(x,  pickle_file='train/lexicon.pickle',
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-   '--pickle-file',  help='CSB training pickle')
+   '--pickle_file',  help='CSB training pickle')
     parser.add_argument(
-      '--job-dir',
+      '--job_dir',
       help='Cloud storage bucket to export the model and store temp files')
     args = parser.parse_args()
     arguments=args.__dict__
