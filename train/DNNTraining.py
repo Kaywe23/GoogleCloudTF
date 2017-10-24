@@ -50,7 +50,7 @@ saver = tf.train.Saver()
 tf_log = 'tf.log'
 
 
-def trainDNN(x,  pickle_file='train/lexicon.pickle', 
+def trainDNN(x,  pickle_file='train/lexikon.pickle', 
                             job_dir='./tmp/DNNTraining',  **args):
     csv_file_1 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv')
     csv_file_2 = file_io.read_file_to_string('gs://machinelearning-dc-bucket/input/vector_test_converted.csv')
