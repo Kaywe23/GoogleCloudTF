@@ -17,7 +17,7 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 flags =tf.app.flags
 FLAGS=flags.FLAGS
-flags.DEFINE_string('output_dir',  'output',  'Output Directory')
+flags.DEFINE_string('output_dir',  'output',  'Output Directory.')
 
 
 nodes_hidden1 = 500
@@ -49,7 +49,7 @@ def neural_network(daten):
     return output
 
 saver = tf.train.Saver()
-checkpoint_file=os.path.join(FLAGS,  output_dir,  'checkpoint')
+checkpoint_file=os.path.join(FLAGS.output_dir,  'checkpoint')
 
 tf_log = 'tf.log'
 
