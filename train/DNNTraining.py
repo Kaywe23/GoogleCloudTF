@@ -105,7 +105,7 @@ def run_training(x):
                 saver.save(sess, checkpoint_file,  global_step=0)
                 print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:',epoch_loss)
                 
-                with open(tf_log,'a') as f:
+                with io.open(tf_log,'a') as f:
                     f.write(str(epoche)+'\n')
                 epoche +=1
                 correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
@@ -113,7 +113,7 @@ def run_training(x):
                 feature_sets = []
                 labels = []
                 zaehler = 0
-                with open(csv_file2, buffering=20000) as f:
+                with io.open(csv_file2, buffering=20000) as f:
                     for zeile in f:
                         try:
                             features = list(eval(zeile.split('::')[0]))
