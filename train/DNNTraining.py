@@ -81,7 +81,7 @@ def run_training(x):
                 if sys.version_info<(3, ):
                     lexikon=pickle.load(f)
                 else:
-                    lexikon = pickle.load(f, encoding='bytes')
+                    lexikon = pickle.load(f)
             with io.open(csv_file1,buffering=20000,encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
