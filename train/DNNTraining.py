@@ -1,41 +1,136 @@
 import os.path
 import tensorflow as tf
 
-# Basic model parameters as external flags.
-flags = tf.app.flags
-FLAGS = flags.FLAGS
+import os
+import tensorflow as tf
+import pickle
+import sys
+import io
+from datetime import datetime
+import numpy as np
+import logging
+from tensorflow.python.lib.io import file_io
+
+import argparse
+
+
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+
+flags =tf.app.flags
+FLAGS=flags.FLAGS
+flags.DEFINE_string('output_dir',  'output',  'Output Directory.')
 flags.DEFINE_string('input_dir', 'input', 'Input Directory.')
 
-def run_training():
-  csv_file = os.path.join(FLAGS.input_dir, 'input.csv');
-  filename_queue = tf.train.string_input_producer([csv_file])
-  key, value = tf.TextLineReader().read(filename_queue)
+nodes_hidden1 = 500
+nodes_hidden2 = 500
+klassen = 2
+batchzahl = 32
+datenanzahl = 2000000
+epochen = 10
 
-  col1, col2 = tf.decode_csv(value, record_defaults=[[1], [1]])
+x = tf.placeholder('float')
+y = tf.placeholder('float')
 
-  x = tf.placeholder("float") # Create a placeholder 'x'
-  w = tf.Variable(5.0, name="weights")
-  y = tf.multiply(w, x)
+aktuelle_epoche = tf.Variable(1)
 
-  with tf.Session() as sess:
-    # Add the variable initializer Op.
-    tf.initialize_all_variables().run()
+hidden_layer1 = {'f_fum':nodes_hidden1,'weight':tf.Variable(tf.random_normal([2638, nodes_hidden1])),
+                                                                    'bias':tf.Variable(tf.random_normal([nodes_hidden1]))}
+hidden_layer2 = {'f_fum':nodes_hidden2,'weight':tf.Variable(tf.random_normal([nodes_hidden1,nodes_hidden2])),
+                                                                    'bias':tf.Variable(tf.random_normal([nodes_hidden2]))}
+output_layer = {'f_fum':None,'weight':tf.Variable(tf.random_normal([nodes_hidden2, klassen])),
+                                                                    'bias':tf.Variable(tf.random_normal([klassen])),}
 
-    # Start populating the filename queue.
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
+  
+def neural_network(daten):
+    l1 = tf.add(tf.matmul(daten,hidden_layer1['weight']), hidden_layer1['bias'])
+    l1 = tf.nn.relu(l1)
+    l2 = tf.add(tf.matmul(l1,hidden_layer2['weight']), hidden_layer2['bias'])
+    l2 = tf.nn.relu(l2)
+    output = tf.matmul(l2,output_layer['weight']) + output_layer['bias']
+    return output
+    
+saver = tf.train.Saver()
+tf_log = 'tf.log'
 
-    for i in range(2):
-      # Retrieve a single instance:
-      x1, x2 = sess.run([col1, col2])
-      print(sess.run(y, feed_dict={x: x1}))
-      print(sess.run(y, feed_dict={x: x2}))
-
-    coord.request_stop()
-    coord.join(threads)
-
+def run_training(x):
+    csv_file1 = os.path.join(FLAGS.input_dir, 'train_converted_vermischt.csv');
+    csv_file2 = os.path.join(FLAGS.input_dir, 'vector_test_converted.csv');
+    pickle_file = os.path.join(FLAGS.input_dir, 'lexikon.pickle');
+    checkpoint_file=os.path.join(FLAGS.output_dir,  'model.ckpt')
+    #filename_queue = tf.train.string_input_producer([csv_file])
+    #key, value = tf.TextLineReader().read(filename_queue)
+    #col1, col2 = tf.decode_csv(value, record_defaults=[[1], [1]])
+    
+    prediction = neural_network(x)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
+    optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        try:
+            epoche = int(open(tf_log,'r').read().split('\n')[-2])+1
+            print('START:',epoche)
+        except:
+            epoche = 1
+        while epoche <= epochen:
+            if epoche != 1:
+                saver.restore(sess,  checkpoint_file,  global_step=0)
+            epoch_loss = 1
+            with file_io.FileIO(pickle_file,'r+') as f:
+                if sys.version_info<(3, ):
+                    lexikon=pickle.load(f)
+                else:
+                    lexikon = pickle.load(f, encoding='bytes')
+            with io.open(csv_file1,buffering=20000,encoding='latin-1') as f:
+                zaehler = 0
+                for zeile in f:
+                    label = zeile.split(':::')[0]
+                    tweet = zeile.split(':::')[1]
+                    woerter = word_tokenize(tweet.lower())
+                    woerter = [lemmatizer.lemmatize(i) for i in woerter]
+                    features = np.zeros(len(lexikon))
+                    for wort in woerter:
+                        if wort.lower() in lexikon:
+                            indexWert = lexikon.index(wort.lower())
+                            features[indexWert] += 1
+                    batch_x = np.array([list(features)])
+                    batch_y = np.array([eval(label)])
+                    print(batch_x)
+                    print(batch_y)
+                    _, c = sess.run([optimizer, cost],feed_dict={x:np.array(batch_x), y: np.array(batch_y)})
+                    epoch_loss += c
+                    if zaehler < datenanzahl:
+                        print('Es wurden', datenanzahl, 'daten verarbeitet')
+                saver.save(sess, checkpoint_file,  global_step=0)
+                print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:',epoch_loss)
+                
+                with open(tf_log,'a') as f:
+                    f.write(str(epoche)+'\n')
+                epoche +=1
+                correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+                accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+                feature_sets = []
+                labels = []
+                zaehler = 0
+                with open(csv_file2, buffering=20000) as f:
+                    for zeile in f:
+                        try:
+                            features = list(eval(zeile.split('::')[0]))
+                            label = list(eval(zeile.split('::')[1]))
+                            feature_sets.append(features)
+                            labels.append(label)
+                            zaehler += 1
+                        except:
+                            pass
+                print('Getestet:',zaehler)
+                test_x = np.array(feature_sets)
+                test_y = np.array(labels)
+                print('Accuracy:',accuracy.eval({x:test_x, y:test_y}))
+                
 def main(_):
-  run_training()
-
+    run_training(x)
+    
 if __name__ == '__main__':
     tf.app.run()
+ 
