@@ -10,7 +10,7 @@ from datetime import datetime
 import numpy as np
 import logging
 from tensorflow.python.lib.io import file_io
-
+import codecs
 import argparse
 
 
@@ -81,8 +81,8 @@ def run_training(x):
                 if sys.version_info<(3, ):
                     lexikon=pickle.load(f)
                 else:
-                    lexikon = pickle.load(f)
-            with io.open(csv_file1,buffering=20000,encoding='latin-1') as f:
+                    lexikon = pickle.load(f, encoding='bytes')
+            with codecs.open(csv_file1,buffering=20000,encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
                     label = zeile.split(':::')[0]
@@ -105,7 +105,7 @@ def run_training(x):
                 saver.save(sess, checkpoint_file,  global_step=0)
                 print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:',epoch_loss)
                 
-                with io.open(tf_log,'a') as f:
+                with open(tf_log,'a') as f:
                     f.write(str(epoche)+'\n')
                 epoche +=1
                 correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
@@ -113,7 +113,7 @@ def run_training(x):
                 feature_sets = []
                 labels = []
                 zaehler = 0
-                with io.open(csv_file2, buffering=20000) as f:
+                with codecs.open(csv_file2, buffering=20000) as f:
                     for zeile in f:
                         try:
                             features = list(eval(zeile.split('::')[0]))
