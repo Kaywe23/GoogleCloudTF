@@ -15,7 +15,9 @@ import argparse
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-
+flags =tf.app.flags
+FLAGS=flags.FLAGS
+flags.DEFINE_string('output_dir',  'output',  'Output Directory')
 
 
 nodes_hidden1 = 500
@@ -47,6 +49,8 @@ def neural_network(daten):
     return output
 
 saver = tf.train.Saver()
+checkpoint_file=os.path.join(FLAGS,  output_dir,  'checkpoint')
+
 tf_log = 'tf.log'
 
 
@@ -72,7 +76,7 @@ def trainDNN(x,  pickle_file='train/lexikon.pickle',
             epoche = 1
         while epoche <= epochen:
             if epoche != 1:
-                saver.restore(sess, model)
+                saver.restore(sess,  checkpoint_file,  global_step=0)
             epoch_loss = 1
             with file_io.FileIO(pickle_file,'r+') as f:
                 if sys.version_info<(3, ):
@@ -99,7 +103,7 @@ def trainDNN(x,  pickle_file='train/lexikon.pickle',
                     epoch_loss += c
                     if zaehler < datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
-                saver.save(sess, model)
+                saver.save(sess, checkpoint_file,  global_step=0)
                 print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:',epoch_loss)
                 
                 with open(tf_log,'a') as f:
