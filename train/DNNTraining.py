@@ -58,7 +58,7 @@ def run_training(x):
     csv_file1 =  file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'train_converted_vermischt.csv'))
     csv_file2 =  file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'vector_test_converted.csv'))
     pickle_file =  file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'lexikon.pickle'))
-    checkpoint_file= file_io.read_file_to_string(os.path.join(FLAGS.output_dir,  'model.ckpt'))
+    checkpoint_file= os.path.join(FLAGS.output_dir,  'model.ckpt')
     #filename_queue = tf.train.string_input_producer([csv_file])
     #key, value = tf.TextLineReader().read(filename_queue)
     #col1, col2 = tf.decode_csv(value, record_defaults=[[1], [1]])
@@ -75,9 +75,9 @@ def run_training(x):
             epoche = 1
         while epoche <= epochen:
             if epoche != 1:
-                saver.restore(sess,  checkpoint_file,  global_step=0)
+                saver.restore(sess,  checkpoint_file)
             epoch_loss = 1
-            with io.open(pickle_file,'r+') as f:
+            with file_io.FileIO(pickle_file,'r+') as f:
                 if sys.version_info<(3, ):
                     lexikon=pickle.load(f)
                 else:
