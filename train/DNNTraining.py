@@ -7,7 +7,7 @@ from nltk.stem import WordNetLemmatizer
 import io
 from tensorflow.python.lib.io import file_io
 import os
-
+from StringIO import StringIO
 lemmatizer = WordNetLemmatizer()
 
 #flags =tf.app.flags
@@ -70,9 +70,10 @@ def trainDNN(x):
 
             with file_io.FileIO(pickle_file, mode='r+') as f:
                 lexikon = pickle.load(f)
-            with file_io.FileIO(csv_file1, buffering=20000, encoding='latin-1') as f:
+            with gcs.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+                csv_reader = csv.reader(StringIO(f.read()))
                 zaehler = 0
-                for zeile in f:
+                for zeile in csv_reader:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
