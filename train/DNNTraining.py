@@ -54,9 +54,12 @@ def trainDNN(x):
     csv_file2 = 'gs://machinelearning-dc-bucket/input/vector_test_converted.csv'
     pickle_file = 'gs://machinelearning-dc-bucket/input/lexikon.pickle'
     checkpoint_file = 'gs://machinelearning-dc-bucket/output/model.ckpt'
+
+
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         try:
@@ -72,9 +75,8 @@ def trainDNN(x):
             with file_io.FileIO(pickle_file, mode='r+') as f:
                 lexikon = pickle.load(f)
             with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
-                csv_reader = csv.reader(StringIO(f.read()))
                 zaehler = 0
-                for zeile in csv_reader:
+                for zeile in f:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
@@ -90,10 +92,10 @@ def trainDNN(x):
                     #print(batch_y)
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
-                    #if zaehler < datenanzahl:
-                        #print('Es wurden', datenanzahl, 'daten verarbeitet')
+                    if zaehler < datenanzahl:
+                        print('Es wurden', datenanzahl, 'daten verarbeitet')
                 saver.save(sess,checkpoint_file)
-                #print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:', epoch_loss)
+                print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:', epoch_loss)
 
                 with open(tf_log, 'a') as f:
                     f.write(str(epoche) + '\n')

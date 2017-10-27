@@ -13,14 +13,15 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 100
+hm_epochs = 10
 
 
 
 
-def train_neural_network(train_file='sentiment_set.pickle',job_dir='./tmp/DNNTrainingLite',**args):
+def train_neural_network(train_file='lexikon.pickle',job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     train_x, train_y,test_x,test_y = pickle.load(file_stream)
+    #lexikon=pickle.load(file_stream)
 
     x = tf.placeholder('float')
     y = tf.placeholder('float')
