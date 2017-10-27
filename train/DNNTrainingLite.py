@@ -57,7 +57,7 @@ def train_neural_network(train_file='sentiment_set.pickle',job_dir='./tmp/DNNTra
         return output
 
     prediction = neural_network_model(x)
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, y))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
     with tf.Session() as sess:
