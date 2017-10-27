@@ -67,7 +67,7 @@ def trainDNN(x):
                 saver.restore(sess, checkpoint_file)
             epoch_loss = 1
 
-            with io.open(pickle_file, 'rb') as f:
+            with open(pickle_file, 'rb') as f:
                 lexikon = pickle.load(f)
             with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
