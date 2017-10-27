@@ -8,6 +8,7 @@ import io
 from tensorflow.python.lib.io import file_io
 import os
 from StringIO import StringIO
+import cloudstorage as gcs
 lemmatizer = WordNetLemmatizer()
 
 #flags =tf.app.flags
