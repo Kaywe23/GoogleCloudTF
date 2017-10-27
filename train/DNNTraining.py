@@ -48,9 +48,9 @@ tf_log = 'tf.log'
 
 
 def trainDNN(x):
-    csv_file1 = file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'train_converted_vermischt.csv'))
-    csv_file2 = file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'vector_test_converted.csv'))
-    pickle_file = file_io.read_file_to_string(os.path.join(FLAGS.input_dir, 'lexikon.pickle'))
+    csv_file1 = os.path.join(FLAGS.input_dir, 'train_converted_vermischt.csv')
+    csv_file2 = os.path.join(FLAGS.input_dir, 'vector_test_converted.csv')
+    pickle_file = os.path.join(FLAGS.input_dir, 'lexikon.pickle')
     checkpoint_file = os.path.join(FLAGS.output_dir, 'model.ckpt')
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
@@ -67,7 +67,7 @@ def trainDNN(x):
                 saver.restore(sess, checkpoint_file)
             epoch_loss = 1
 
-            with open(pickle_file, 'rb') as f:
+            with io.open(pickle_file, 'rb') as f:
                 lexikon = pickle.load(f)
             with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
@@ -83,8 +83,8 @@ def trainDNN(x):
                             features[indexWert] += 1
                     batch_x = np.array([list(features)])
                     batch_y = np.array([eval(label)])
-                    print(batch_x)
-                    print(batch_y)
+                    #print(batch_x)
+                    #print(batch_y)
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
                     #if zaehler < datenanzahl:
@@ -124,60 +124,3 @@ if __name__ == '__main__':
     tf.app.run()
 
 
-def testDNN():
-    prediction = neural_network(x)
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        for epoche in range(epochen):
-            try:
-                saver.restore(sess, "model.ckpt")
-            except Exception as e:
-                print(str(e))
-            epoch_loss = 0
-
-            correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-            accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-            feature_sets = []
-            labels = []
-            zaehler = 0
-            with open('vector_test_converted.csv', buffering=20000) as f:
-                for zeile in f:
-                    try:
-                        features = list(eval(zeile.split('::')[0]))
-                        label = list(eval(zeile.split('::')[1]))
-                        # print(features)
-                        # print(label)
-                        feature_sets.append(features)
-                        labels.append(label)
-                        zaehler += 1
-                    except:
-                        pass
-            print('Getested:', zaehler)
-            test_x = np.array(feature_sets)
-            test_y = np.array(labels)
-            print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
-
-
-#testDNN()
-
-
-def useDNN(input_data):
-    prediction = neural_network(x)
-    with open('lexikon.pickle', 'rb') as f:
-        lexikon = pickle.load(f)
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        saver.restore(sess, "model.ckpt")
-        woerter = word_tokenize(input_data.lower())
-        woerter = [lemmatizer.lemmatize(i) for i in current_words]
-        features = np.zeros(len(lexikon))
-        for wort in woerter:
-            if wort.lower() in lexikon:
-                indexWert = lexikon.index(wort.lower())
-                features[indexWert] += 1
-                features = np.array(list(features))
-                result = (sess.run(tf.argmax(prediction.eval(feed_dict={x: [features]}), 1)))
-                if result[0] == 0:
-                    print('Positive:', input_data)
-                elif result[0] == 1:
-                    print('Negative:', input_data)
