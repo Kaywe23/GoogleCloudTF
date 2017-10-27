@@ -9,10 +9,11 @@ from tensorflow.python.lib.io import file_io
 import os
 
 lemmatizer = WordNetLemmatizer()
-flags =tf.app.flags
-FLAGS=flags.FLAGS
-flags.DEFINE_string('output_dir',  'output',  'Output Directory.')
-flags.DEFINE_string('input_dir', 'input', 'Input Directory.')
+
+#flags =tf.app.flags
+#FLAGS=flags.FLAGS
+#flags.DEFINE_string('output_dir',  'output',  'Output Directory.')
+#flags.DEFINE_string('input_dir', 'input', 'Input Directory.')
 
 nodes_hidden1 = 500
 nodes_hidden2 = 500
@@ -48,10 +49,10 @@ tf_log = 'tf.log'
 
 
 def trainDNN(x):
-    csv_file1 = os.path.join(FLAGS.input_dir, 'train_converted_vermischt.csv')
-    csv_file2 = os.path.join(FLAGS.input_dir, 'vector_test_converted.csv')
-    pickle_file = os.path.join(FLAGS.input_dir, 'lexikon.pickle')
-    checkpoint_file = os.path.join(FLAGS.output_dir, 'model.ckpt')
+    csv_file1 = 'gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv'
+    csv_file2 = 'gs://machinelearning-dc-bucket/input/vector_test_converted.csv'
+    pickle_file = 'gs://machinelearning-dc-bucket/input/lexikon.pickle'
+    checkpoint_file = 'gs://machinelearning-dc-bucket/output/model.ckpt'
     prediction = neural_network(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
@@ -67,9 +68,9 @@ def trainDNN(x):
                 saver.restore(sess, checkpoint_file)
             epoch_loss = 1
 
-            with open(pickle_file, 'rb') as f:
+            with file_io.FileIO(pickle_file, mode='r+') as f:
                 lexikon = pickle.load(f)
-            with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+            with file_io.FileIO(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
                     label = zeile.split(':::')[0]
@@ -100,7 +101,7 @@ def trainDNN(x):
                 feature_sets = []
                 labels = []
                 zaehler = 0
-                with open(csv_file2, buffering=20000) as f:
+                with file_io.FileIO(csv_file2, buffering=20000) as f:
                     for zeile in f:
                         try:
                             features = list(eval(zeile.split('::')[0]))
