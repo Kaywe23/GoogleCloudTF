@@ -71,7 +71,7 @@ def trainDNN(x):
 
             with file_io.FileIO(pickle_file, mode='r+') as f:
                 lexikon = pickle.load(f)
-            with open(csv_file1, buffering=20000, encoding='latin-1') as f:
+            with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 csv_reader = csv.reader(StringIO(f.read()))
                 zaehler = 0
                 for zeile in csv_reader:
@@ -103,7 +103,7 @@ def trainDNN(x):
                 feature_sets = []
                 labels = []
                 zaehler = 0
-                with file_io.FileIO(csv_file2, buffering=20000) as f:
+                with open(csv_file2, buffering=20000) as f:
                     for zeile in f:
                         try:
                             features = list(eval(zeile.split('::')[0]))
