@@ -1,11 +1,12 @@
-
 import tensorflow as tf
 import pickle
 import numpy as np
 from tensorflow.python.lib.io import file_io
 import argparse
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 
-
+lemmatizer = WordNetLemmatizer()
 
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
@@ -14,20 +15,22 @@ n_nodes_hl3 = 1500
 n_classes = 2
 batch_size = 100
 hm_epochs = 10
+datenanzahl = 2000000
 
 
 
 
-def train_neural_network(train_file='seniment_set.pickle',job_dir='./tmp/DNNTrainingLite',**args):
+def train_neural_network(train_file='lexikon.pickle',csv_file1='train_converted_vermischt',
+                         job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
-    train_x, train_y,test_x,test_y = pickle.load(file_stream)
-    #lexikon=pickle.load(file_stream)
+    lexikon = pickle.load(file_stream)
+
 
     x = tf.placeholder('float')
     y = tf.placeholder('float')
 
     hidden_1_layer = {'f_fum': n_nodes_hl1,
-                      'weight': tf.Variable(tf.random_normal([len(train_x[0]), n_nodes_hl1])),
+                      'weight': tf.Variable(tf.random_normal([2578, n_nodes_hl1])),
                       'bias': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
     hidden_2_layer = {'f_fum': n_nodes_hl2,
@@ -64,25 +67,33 @@ def train_neural_network(train_file='seniment_set.pickle',job_dir='./tmp/DNNTrai
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        for epoch in range(hm_epochs):
-            epoch_loss = 0
-            i = 0
-            while i < len(train_x):
-                start = i
-                end = i + batch_size
-                batch_x = np.array(train_x[start:end])
-                batch_y = np.array(train_y[start:end])
+        epoch=1
+        while epoch <= hm_epochs:
 
-                _, c = sess.run([optimizer, cost], feed_dict={x: batch_x,
-                                                              y: batch_y})
-                epoch_loss += c
-                i += batch_size
+            epoch_loss = 1
 
-            print('Epoch', epoch + 1, 'completed out of', hm_epochs, 'loss:', epoch_loss)
-        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+            with open(csv_file1, buffering=20000, encoding='latin-1') as f:
+                zaehler = 0
+                for zeile in f:
+                    label = zeile.split(':::')[0]
+                    tweet = zeile.split(':::')[1]
+                    woerter = word_tokenize(tweet.lower())
+                    woerter = [lemmatizer.lemmatize(i) for i in woerter]
+                    features = np.zeros(len(lexikon))
+                    for wort in woerter:
+                        if wort.lower() in lexikon:
+                            indexWert = lexikon.index(wort.lower())
+                            features[indexWert] += 1
+                    batch_x = np.array([list(features)])
+                    batch_y = np.array([eval(label)])
 
-        print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
+                    _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
+                    epoch_loss += c
+                    if zaehler < datenanzahl:
+                        print('Es wurden', datenanzahl, 'daten verarbeitet')
+
+                print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
+
 
 
 if __name__ == '__main__':
@@ -98,6 +109,9 @@ if __name__ == '__main__':
         help='GCS location to write checkpoints and export models',
         required=True
     )
+    parser.add_argument('--csv-file1',
+                        help='csv file',
+                        required =True)
     args = parser.parse_args()
     arguments = args.__dict__
 
