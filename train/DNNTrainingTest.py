@@ -5,7 +5,7 @@ from tensorflow.python.lib.io import file_io
 import argparse
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-
+import io
 lemmatizer = WordNetLemmatizer()
 
 n_nodes_hl1 = 1500
@@ -72,7 +72,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file1='train_converted_
 
             epoch_loss = 1
 
-            with open(csv_file1, buffering=20000, encoding='latin-1') as f:
+            with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
                 for zeile in f:
                     label = zeile.split(':::')[0]
