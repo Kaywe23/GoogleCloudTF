@@ -79,26 +79,26 @@ def train_neural_network(train_file='lexikon.pickle',
             epoch_loss = 1
 
             #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
-                zaehler = 0
-                for zeile in content:
-                    label = zeile.split(':::')[0]
-                    tweet = zeile.split(':::')[1]
-                    woerter = word_tokenize(tweet.lower())
-                    woerter = [lemmatizer.lemmatize(i) for i in woerter]
-                    features = np.zeros(len(lexikon))
-                    for wort in woerter:
-                        if wort.lower() in lexikon:
-                            indexWert = lexikon.index(wort.lower())
-                            features[indexWert] += 1
-                    batch_x = np.array([list(features)])
-                    batch_y = np.array([eval(label)])
+            zaehler = 0
+            for zeile in content:
+                label = zeile.split(':::')[0]
+                tweet = zeile.split(':::')[1]
+                woerter = word_tokenize(tweet.lower())
+                woerter = [lemmatizer.lemmatize(i) for i in woerter]
+                features = np.zeros(len(lexikon))
+                for wort in woerter:
+                    if wort.lower() in lexikon:
+                        indexWert = lexikon.index(wort.lower())
+                        features[indexWert] += 1
+                batch_x = np.array([list(features)])
+                batch_y = np.array([eval(label)])
 
-                    _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                    epoch_loss += c
-                    if zaehler < datenanzahl:
-                        print('Es wurden', datenanzahl, 'daten verarbeitet')
+                _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
+                epoch_loss += c
+                if zaehler < datenanzahl:
+                    print('Es wurden', datenanzahl, 'daten verarbeitet')
 
-                print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
+            print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
 
 
