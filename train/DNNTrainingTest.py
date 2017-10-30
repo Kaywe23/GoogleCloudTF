@@ -28,7 +28,7 @@ def train_neural_network(train_file='lexikon.pickle',
     lexikon = pickle.load(file_stream)
 
     #client = storage.Client()
-    storage_client = storage.Client.from_service_account_json('./MachineLearning DC-d672249f7ad8.json')
+    storage_client = storage.Client.from_service_account_json('MachineLearning DC-2653f1e39dfa.json')
 
     bucket = storage_client.get_bucket('machinelearning-dc-bucket')
     blob = storage.Blob('train_converted_vermischt.csv', bucket)
