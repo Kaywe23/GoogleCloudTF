@@ -7,6 +7,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import io
 lemmatizer = WordNetLemmatizer()
+from google.cloud import storage
 
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
@@ -20,10 +21,15 @@ datenanzahl = 2000000
 
 
 
-def train_neural_network(train_file='lexikon.pickle',csv_file1='train_converted_vermischt',
+def train_neural_network(train_file='lexikon.pickle',
                          job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
+
+    client = storage.Client()
+    bucket = client.get_bucket('machinelearning-dc-bucket')
+    blob = storage.Blob('train_converted_vermischt.csv', bucket)
+    content = blob.download_as_string()
 
 
     x = tf.placeholder('float')
@@ -72,9 +78,9 @@ def train_neural_network(train_file='lexikon.pickle',csv_file1='train_converted_
 
             epoch_loss = 1
 
-            with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+            #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
-                for zeile in f:
+                for zeile in content:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
@@ -109,9 +115,9 @@ if __name__ == '__main__':
         help='GCS location to write checkpoints and export models',
         required=True
     )
-    parser.add_argument('--csv-file1',
-                        help='csv file',
-                        required =True)
+    #parser.add_argument('--csv-file1',
+                       # help='csv file',
+                       # required =True)
     args = parser.parse_args()
     arguments = args.__dict__
 
