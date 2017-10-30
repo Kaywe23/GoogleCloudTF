@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer
 import io
 lemmatizer = WordNetLemmatizer()
 from google.cloud import storage
+#export GOOGLE_APPLICATION_CREDENTIALS='/home/kevin/GoogleCloudTF/MachineLearning DC-d672249f7ad8.json'
 
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
@@ -26,8 +27,11 @@ def train_neural_network(train_file='lexikon.pickle',
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
-    client = storage.Client()
-    bucket = client.get_bucket('machinelearning-dc-bucket')
+    #client = storage.Client()
+    storage_client = storage.Client.from_service_account_json(
+        'MachineLearning DC-d672249f7ad8.json')
+
+    bucket = storage_client.get_bucket('machinelearning-dc-bucket')
     blob = storage.Blob('train_converted_vermischt.csv', bucket)
     content = blob.download_as_string()
 
