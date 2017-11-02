@@ -5,7 +5,7 @@ from tensorflow.python.lib.io import file_io
 import argparse
 from nltk.tokenize import word_tokenize
 import nltk
-nltk.download('points')
+nltk.download('punkt')
 from nltk.stem import WordNetLemmatizer
 import io
 import csv
