@@ -16,8 +16,7 @@ reload(sys)
 sys.setdefaultencoding('latin-1')
 
 lemmatizer = WordNetLemmatizer()
-from StringIO import StringIO
-#export GOOGLE_APPLICATION_CREDENTIALS='/home/kevin/GoogleCloudTF/train/MachineLearning DC-d672249f7ad8.json'
+
 
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
@@ -105,8 +104,10 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
 
                 _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                 epoch_loss += c
-                if zaehler < datenanzahl:
-                    print('Es wurden', datenanzahl, 'daten verarbeitet')
+                zaehler+=1
+                #if zaehler < datenanzahl:
+                #print('Es wurden', datenanzahl, 'daten verarbeitet')
+                print('Batch: ',zaehler,'von ', datenanzahl, ' Epoche: ',epoch, 'Loss: ',c,)
 
             print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 

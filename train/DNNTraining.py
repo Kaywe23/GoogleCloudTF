@@ -92,6 +92,7 @@ def trainDNN(x):
                     #print(batch_y)
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
+                    zaehler+=1
                     if zaehler < datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
                 saver.save(sess,checkpoint_file)
