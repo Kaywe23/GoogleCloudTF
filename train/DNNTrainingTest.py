@@ -25,7 +25,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 10
+hm_epochs = 1
 datenanzahl = 2000000
 
 
@@ -88,7 +88,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
 
             zaehler = 0
             for zeile in lines:
-
+                #zeile.encode('ascii', 'ignore')
                 label = zeile.split(':::')[0]
 
                 tweet = zeile.split(':::')[1]
