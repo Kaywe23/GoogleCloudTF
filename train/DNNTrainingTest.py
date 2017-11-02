@@ -80,14 +80,15 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            gcs_file = tf.gfile.Open(csv_file, 'rb').readlines().decode()
+            gcs_file = tf.gfile.Open(csv_file, 'rb')
+            lines=gcs_file.readlines()
             #csv_reader=csv.reader(gcs_file)
 
             #csv_reader=gcs_file.read()
             #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
             #df_train = pd.read_csv(tf.gfile.Open("./train.csv"),skipinitialspace=True)
             zaehler = 0
-            for zeile in gcs_file:
+            for zeile in lines:
                 label = zeile.split(':::')[0]
                 tweet = zeile.split(':::')[1]
                 woerter = word_tokenize(tweet.lower())
