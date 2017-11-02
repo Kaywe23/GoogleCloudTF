@@ -6,7 +6,7 @@ import argparse
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import io
-from google.cloud import storage as gcs
+
 lemmatizer = WordNetLemmatizer()
 from StringIO import StringIO
 #export GOOGLE_APPLICATION_CREDENTIALS='/home/kevin/GoogleCloudTF/train/MachineLearning DC-d672249f7ad8.json'
@@ -27,6 +27,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
                          job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
+
 
 
     x = tf.placeholder('float')
@@ -74,12 +75,12 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            with gcs.open(csv_file, 'r') as gcs_file:
-                csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
+            with tf.gfile.Open(csv_file, 'r') as gcs_file:
+                #csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
                                         quotechar='"')
                 #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
-                for zeile in csv_reader:
+                for zeile in f:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
