@@ -29,7 +29,7 @@ datenanzahl = 2000000
 
 
 def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_vermischt.csv',
-                         job_dir='./tmp/DNNTrainingLite',**args):
+                         csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
@@ -108,6 +108,28 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
 
             print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
+            epoch += 1
+            correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+            feature_sets = []
+            labels = []
+            zaehler = 0
+            gcs_file = tf.gfile.Open(csv_file2, 'rb')
+            lines = gcs_file.readlines()
+
+            for zeile in lines:
+                try:
+                    features = list(eval(zeile.split('::')[0]))
+                    label = list(eval(zeile.split('::')[1]))
+                    feature_sets.append(features)
+                    labels.append(label)
+                    zaehler += 1
+                except:
+                    pass
+            print('Getestet:', zaehler)
+            test_x = np.array(feature_sets)
+            test_y = np.array(labels)
+            print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
 
 if __name__ == '__main__':
@@ -126,6 +148,9 @@ if __name__ == '__main__':
     parser.add_argument('--csv-file',
                         help='csv file',
                         required =True)
+    parser.add_argument('--csv-file2',
+                        help='csv file2',
+                        required=True)
     args = parser.parse_args()
     arguments = args.__dict__
 
