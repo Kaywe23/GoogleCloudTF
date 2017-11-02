@@ -6,6 +6,7 @@ import argparse
 from nltk.tokenize import word_tokenize
 import nltk
 nltk.download('punkt')
+nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer
 import io
 import csv
