@@ -5,7 +5,7 @@ from tensorflow.python.lib.io import file_io
 import argparse
 from nltk.tokenize import word_tokenize
 import nltk
-nltk.download('all')
+nltk.download('points')
 from nltk.stem import WordNetLemmatizer
 import io
 import csv
@@ -79,7 +79,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            gcs_file = tf.gfile.Open(csv_file, 'rb').readlines()
+            gcs_file = tf.gfile.Open(csv_file, 'r').readlines()
 
             #csv_reader=gcs_file.read()
             #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
