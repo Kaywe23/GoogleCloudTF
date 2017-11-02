@@ -6,8 +6,9 @@ import argparse
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import io
+from google.cloud import storage as gcs
 lemmatizer = WordNetLemmatizer()
-from google.cloud import storage
+from StringIO import StringIO
 #export GOOGLE_APPLICATION_CREDENTIALS='/home/kevin/GoogleCloudTF/train/MachineLearning DC-d672249f7ad8.json'
 
 n_nodes_hl1 = 1500
@@ -22,17 +23,10 @@ datenanzahl = 2000000
 
 
 
-def train_neural_network(train_file='lexikon.pickle',
+def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_vermischt.csv',
                          job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
-
-    #client = storage.Client()
-    storage_client = storage.Client.from_service_account_json('MachineLearning DC-2653f1e39dfa.json')
-
-    bucket = storage_client.get_bucket('machinelearning-dc-bucket')
-    blob = storage.Blob('train_converted_vermischt.csv', bucket)
-    content = blob.download_as_string()
 
 
     x = tf.placeholder('float')
@@ -80,28 +74,30 @@ def train_neural_network(train_file='lexikon.pickle',
         while epoch <= hm_epochs:
 
             epoch_loss = 1
+            with gcs.open(csv_file, 'r') as gcs_file:
+                csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
+                                        quotechar='"')
+                #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+                zaehler = 0
+                for zeile in csv_reader:
+                    label = zeile.split(':::')[0]
+                    tweet = zeile.split(':::')[1]
+                    woerter = word_tokenize(tweet.lower())
+                    woerter = [lemmatizer.lemmatize(i) for i in woerter]
+                    features = np.zeros(len(lexikon))
+                    for wort in woerter:
+                        if wort.lower() in lexikon:
+                            indexWert = lexikon.index(wort.lower())
+                            features[indexWert] += 1
+                    batch_x = np.array([list(features)])
+                    batch_y = np.array([eval(label)])
 
-            #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
-            zaehler = 0
-            for zeile in content:
-                label = zeile.split(':::')[0]
-                tweet = zeile.split(':::')[1]
-                woerter = word_tokenize(tweet.lower())
-                woerter = [lemmatizer.lemmatize(i) for i in woerter]
-                features = np.zeros(len(lexikon))
-                for wort in woerter:
-                    if wort.lower() in lexikon:
-                        indexWert = lexikon.index(wort.lower())
-                        features[indexWert] += 1
-                batch_x = np.array([list(features)])
-                batch_y = np.array([eval(label)])
+                    _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
+                    epoch_loss += c
+                    if zaehler < datenanzahl:
+                        print('Es wurden', datenanzahl, 'daten verarbeitet')
 
-                _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                epoch_loss += c
-                if zaehler < datenanzahl:
-                    print('Es wurden', datenanzahl, 'daten verarbeitet')
-
-            print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
+                print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
 
 
@@ -118,9 +114,9 @@ if __name__ == '__main__':
         help='GCS location to write checkpoints and export models',
         required=True
     )
-    #parser.add_argument('--csv-file1',
-                       # help='csv file',
-                       # required =True)
+    parser.add_argument('--csv-file',
+                        help='csv file',
+                        required =True)
     args = parser.parse_args()
     arguments = args.__dict__
 
