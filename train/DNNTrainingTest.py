@@ -76,11 +76,11 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
 
             epoch_loss = 1
             with tf.gfile.Open(csv_file, 'r') as gcs_file:
-                #csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
+                csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
                                         #quotechar='"')
                 #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
-                for zeile in gcs_file:
+                for zeile in csv_reader:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
