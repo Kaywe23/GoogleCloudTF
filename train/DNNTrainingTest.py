@@ -90,7 +90,9 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
             zaehler = 0
             for zeile in lines:
                 label = zeile.split(':::')[0]
+                label.decode('latin-1')
                 tweet = zeile.split(':::')[1]
+                tweet.decode('latin-1')
                 woerter = word_tokenize(tweet.lower())
                 woerter = [lemmatizer.lemmatize(i) for i in woerter]
                 features = np.zeros(len(lexikon))
