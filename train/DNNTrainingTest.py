@@ -7,6 +7,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import io
 import csv
+import pandas as pd
 
 lemmatizer = WordNetLemmatizer()
 from StringIO import StringIO
@@ -76,12 +77,12 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            with tf.gfile.Open(csv_file, 'r') as gcs_file:
-                csv_reader = csv.reader(StringIO(gcs_file.read()), delimiter=',',
-                                        quotechar='"')
+            with pd.read_csv(tf.gfile.Open(csv_file, 'rb'),encoding='latin-1') as gcs_file:
+                #csv_reader=gcs_file.read()
                 #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+                #df_train = pd.read_csv(tf.gfile.Open("./train.csv"),skipinitialspace=True)
                 zaehler = 0
-                for zeile in csv_reader:
+                for zeile in gcs_file:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
