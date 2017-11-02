@@ -79,7 +79,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            gcs_file = tf.gfile.Open(csv_file, 'rb')
+            gcs_file = tf.gfile.Open(csv_file, 'rb').readlines()
 
             #csv_reader=gcs_file.read()
             #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
