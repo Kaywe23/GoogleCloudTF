@@ -80,7 +80,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
                                         #quotechar='"')
                 #with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
                 zaehler = 0
-                for zeile in f:
+                for zeile in gcs_file:
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
