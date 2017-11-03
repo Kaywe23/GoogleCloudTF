@@ -24,8 +24,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 10
-datenanzahl = 20000
+hm_epochs = 3
+datenanzahl = 2000
 
 
 
@@ -77,7 +77,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
+        print('Start Training')
         epoch=1
         while epoch <= hm_epochs:
 
@@ -108,7 +108,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
                         break
 
-            print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
+            print('Es ist/sind', epoch, 'Epoche/n von', hm_epochs, 'fertig,loss:', epoch_loss)
 
             epoch += 1
 
