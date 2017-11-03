@@ -24,8 +24,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 3
-datenanzahl = 2000
+hm_epochs = 15
+datenanzahl = 2000000
 
 
 
