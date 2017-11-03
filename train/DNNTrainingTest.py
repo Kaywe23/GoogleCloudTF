@@ -25,7 +25,7 @@ n_nodes_hl3 = 1500
 n_classes = 2
 batch_size = 100
 hm_epochs = 1
-datenanzahl = 2000
+datenanzahl = 500
 
 
 
@@ -105,7 +105,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
                 _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                 epoch_loss += c
                 zaehler+=1
-                #if zaehler < datenanzahl:
+                if zaehler < datenanzahl:
                 #print('Es wurden', datenanzahl, 'daten verarbeitet')
                 print('Batch: ',zaehler,'von ', datenanzahl, ' Epoche: ',epoch, 'Loss: ',c,)
 
