@@ -11,10 +11,7 @@ from StringIO import StringIO
 
 lemmatizer = WordNetLemmatizer()
 
-#flags =tf.app.flags
-#FLAGS=flags.FLAGS
-#flags.DEFINE_string('output_dir',  'output',  'Output Directory.')
-#flags.DEFINE_string('input_dir', 'input', 'Input Directory.')
+
 
 nodes_hidden1 = 500
 nodes_hidden2 = 500

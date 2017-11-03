@@ -30,7 +30,7 @@ datenanzahl = 500
 
 
 
-def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_vermischt.csv',
+def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
                          csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTrainingLite',**args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
@@ -41,7 +41,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
     y = tf.placeholder('float')
 
     hidden_1_layer = {'f_fum': n_nodes_hl1,
-                      'weight': tf.Variable(tf.random_normal([2578, n_nodes_hl1])),
+                      'weight': tf.Variable(tf.random_normal([2638, n_nodes_hl1])),
                       'bias': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
     hidden_2_layer = {'f_fum': n_nodes_hl2,
@@ -111,7 +111,7 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
             print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
             epoch += 1
-            
+
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
         feature_sets = []
