@@ -76,7 +76,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
 
         epoch=1
         while epoch <= hm_epochs:
