@@ -106,8 +106,8 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
                 epoch_loss += c
                 zaehler+=1
                 if zaehler < datenanzahl:
-                #print('Es wurden', datenanzahl, 'daten verarbeitet')
-                print('Batch: ',zaehler,'von ', datenanzahl, ' Epoche: ',epoch, 'Loss: ',c,)
+                    #print('Es wurden', datenanzahl, 'daten verarbeitet')
+                    print('Batch: ',zaehler,'von ', datenanzahl, ' Epoche: ',epoch, 'Loss: ',c,)
 
             print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
