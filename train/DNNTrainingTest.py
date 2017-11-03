@@ -82,45 +82,46 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
         while epoch <= hm_epochs:
 
             epoch_loss = 1
-            gcs_file = tf.gfile.Open(csv_file, 'rb')
-            lines=gcs_file.readlines()
+            with tf.gfile.Open(csv_file, 'rb') as gcs_file:
+                lines=gcs_file.readlines()
 
-            zaehler = 0
-            for zeile in lines:
-                #zeile.encode('ascii', 'ignore')
-                label = zeile.split(':::')[0]
+                zaehler = 0
+                for zeile in lines:
+                    zaehler += 1
+                    label = zeile.split(':::')[0]
+                    tweet = zeile.split(':::')[1]
+                    woerter = word_tokenize(tweet.lower())
+                    woerter = [lemmatizer.lemmatize(i) for i in woerter]
+                    features = np.zeros(len(lexikon))
+                    for wort in woerter:
+                        if wort.lower() in lexikon:
+                            indexWert = lexikon.index(wort.lower())
+                            features[indexWert] += 1
 
-                tweet = zeile.split(':::')[1]
+                    batch_x = np.array([list(features)])
+                    batch_y = np.array([eval(label)])
 
-                woerter = word_tokenize(tweet.lower())
-                woerter = [lemmatizer.lemmatize(i) for i in woerter]
-                features = np.zeros(len(lexikon))
-                for wort in woerter:
-                    if wort.lower() in lexikon:
-                        indexWert = lexikon.index(wort.lower())
-                        features[indexWert] += 1
-                batch_x = np.array([list(features)])
-                batch_y = np.array([eval(label)])
+                    _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
+                    epoch_loss += c
 
-                _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                epoch_loss += c
-                zaehler+=1
-                if zaehler < datenanzahl:
-                    #print('Es wurden', datenanzahl, 'daten verarbeitet')
-                    print('Batch: ',zaehler,'von ', datenanzahl, ' Epoche: ',epoch, 'Loss: ',c,)
+                    if zaehler > datenanzahl:
+                        print('Es wurden', datenanzahl, 'daten verarbeitet')
+                        break
 
             print('Es sind', epoch, 'Epochen von', hm_epochs, 'fertig,loss:', epoch_loss)
 
             epoch += 1
-            correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-            accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-            feature_sets = []
-            labels = []
-            zaehler = 0
-            gcs_file = tf.gfile.Open(csv_file2, 'rb')
-            lines = gcs_file.readlines()
+            
+        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+        feature_sets = []
+        labels = []
+        zaehler = 0
 
-            for zeile in lines:
+        with tf.gfile.Open(csv_file2, 'rb') as gc_file:
+            lines2 = gc_file.readlines()
+
+            for zeile in lines2:
                 try:
                     features = list(eval(zeile.split('::')[0]))
                     label = list(eval(zeile.split('::')[1]))
@@ -129,10 +130,10 @@ def train_neural_network(train_file='lexikon.pickle',csv_file='train_converted_v
                     zaehler += 1
                 except:
                     pass
-            print('Getestet:', zaehler)
-            test_x = np.array(feature_sets)
-            test_y = np.array(labels)
-            print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
+        print('Getestet:', zaehler)
+        test_x = np.array(feature_sets)
+        test_y = np.array(labels)
+        print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
 
 if __name__ == '__main__':
