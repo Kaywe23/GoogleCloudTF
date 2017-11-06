@@ -104,7 +104,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
-                    writer.add_summary(cost, epoch * zaehler + c)
+
 
 
                     if zaehler > datenanzahl:
@@ -117,8 +117,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        acc_summary = tf.summary.scalar("accuracy", accuracy)
-        writer.add_summary(acc_summary)
+        
         feature_sets = []
         labels = []
         zaehler = 0
