@@ -24,7 +24,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 10
+hm_epochs = 1
 datenanzahl = 1000
 
 
@@ -76,6 +76,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
     prediction = neural_network_model(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
+    tf.scalar_summary("cost", cost)
+
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
     with tf.Session() as sess:
@@ -90,8 +92,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         epoch = 1
 
         while epoch <= hm_epochs:
-            #if epoch != 1:
-                #saver.restore(sess,checkpoint)
+
+            saver.restore(sess,checkpoint)
 
             epoch_loss = 1
             with tf.gfile.Open(csv_file, 'rb') as gcs_file:
@@ -116,7 +118,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
 
-
+                    writer.add_summary(c, epoch * zaehler + zeile)
 
                     if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
@@ -131,7 +133,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-
+        tf.scalar_summary("accuracy", accuracy)
         feature_sets = []
         labels = []
         zaehler = 0
@@ -148,6 +150,12 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     zaehler += 1
                 except:
                     pass
+
+        summary_op = tf.merge_all_summaries()
+
+
+        # write log
+
         print('Getestet:', zaehler)
         test_x = np.array(feature_sets)
         test_y = np.array(labels)
