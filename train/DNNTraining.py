@@ -33,6 +33,7 @@ datenanzahl = 1000
 def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
                          csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTrainingLite',
                          checkpoint='model.ckpt',**args):
+
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
@@ -89,8 +90,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         epoch = 1
 
         while epoch <= hm_epochs:
-            if epoch != 1:
-                saver.restore(sess,"model.ckpt")
+            #if epoch != 1:
+                #saver.restore(sess,checkpoint)
 
             epoch_loss = 1
             with tf.gfile.Open(csv_file, 'rb') as gcs_file:
@@ -121,7 +122,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
                         break
 
-            saver.save(sess, "model.ckpt")
+            saver.save(sess, checkpoint)
             print('Es ist/sind', epoch, 'Epoche/n von', hm_epochs, 'fertig,loss:', epoch_loss)
 
             epoch += 1
