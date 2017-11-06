@@ -24,8 +24,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 15
-datenanzahl = 2000000
+hm_epochs = 2
+datenanzahl = 500
 
 
 
@@ -77,6 +77,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
         epoch=1
         while epoch <= hm_epochs:
@@ -103,6 +104,8 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
+                    writer.add_summary(cost, epoch * zaehler + c)
+
 
                     if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
@@ -114,6 +117,8 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
 
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+        acc_summary = tf.summary.scalar("accuracy", accuracy)
+        writer.add_summary(acc_summary)
         feature_sets = []
         labels = []
         zaehler = 0
@@ -133,6 +138,7 @@ def train_neural_network(train_file='lexikon2.pickle',csv_file='train_converted_
         print('Getestet:', zaehler)
         test_x = np.array(feature_sets)
         test_y = np.array(labels)
+        writer.flush()
         print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
 
