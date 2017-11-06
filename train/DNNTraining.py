@@ -24,7 +24,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 1
+hm_epochs = 10
 datenanzahl = 1000
 
 
@@ -78,8 +78,11 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
     correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-    tf.summary.scalar("accuracy", accuracy)
-    tf.summary.scalar("cost", cost)
+
+    train_cost_summary = tf.summary.scalar("train_cost", cost)
+    train_acc_summary = tf.summary.scalar("train_accuracy", accuracy)
+    test_cost_summary = tf.summary.scalar("test_cost", cost)
+    test_acc_summary = tf.summary.scalar("test_accuracy", accuracy)
     summary_op = tf.summary.merge_all()
 
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
@@ -121,8 +124,6 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
-
-                    
 
                     if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
