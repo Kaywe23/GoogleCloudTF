@@ -1,79 +1,104 @@
 import tensorflow as tf
 import pickle
 import numpy as np
-import nltk
+from tensorflow.python.lib.io import file_io
+import argparse
 from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('punkt')
+nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer
 import io
-from tensorflow.python.lib.io import file_io
-import os
-from StringIO import StringIO
+import csv
+import pandas as pd
+import sys
+reload(sys)
+sys.setdefaultencoding('latin-1')
 
 lemmatizer = WordNetLemmatizer()
 
 
+n_nodes_hl1 = 1500
+n_nodes_hl2 = 1500
+n_nodes_hl3 = 1500
 
-nodes_hidden1 = 500
-nodes_hidden2 = 500
-klassen = 2
-batchzahl = 32
-datenanzahl = 2000000
-epochen = 1
-
-x = tf.placeholder('float')
-y = tf.placeholder('float')
-
-aktuelle_epoche = tf.Variable(1)
-
-hidden_layer1 = {'f_fum': nodes_hidden1, 'weight': tf.Variable(tf.random_normal([2578, nodes_hidden1])),
-                 'bias': tf.Variable(tf.random_normal([nodes_hidden1]))}
-hidden_layer2 = {'f_fum': nodes_hidden2, 'weight': tf.Variable(tf.random_normal([nodes_hidden1, nodes_hidden2])),
-                 'bias': tf.Variable(tf.random_normal([nodes_hidden2]))}
-output_layer = {'f_fum': None, 'weight': tf.Variable(tf.random_normal([nodes_hidden2, klassen])),
-                'bias': tf.Variable(tf.random_normal([klassen])), }
+n_classes = 2
+batch_size = 100
+hm_epochs = 10
+datenanzahl = 1000
 
 
-def neural_network(daten):
-    l1 = tf.add(tf.matmul(daten, hidden_layer1['weight']), hidden_layer1['bias'])
-    l1 = tf.nn.relu(l1)
-    l2 = tf.add(tf.matmul(l1, hidden_layer2['weight']), hidden_layer2['bias'])
-    l2 = tf.nn.relu(l2)
-    output = tf.matmul(l2, output_layer['weight']) + output_layer['bias']
-    return output
 
 
-saver = tf.train.Saver()
-tf_log = 'tf.log'
+def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
+                         csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTrainingLite',
+                         checkpoint='model.ckpt',**args):
+    file_stream = file_io.FileIO(train_file, mode='r')
+    lexikon = pickle.load(file_stream)
 
+    x = tf.placeholder('float')
+    y = tf.placeholder('float')
 
-def trainDNN(x):
-    csv_file1 = 'gs://machinelearning-dc-bucket/input/train_converted_vermischt.csv'
-    csv_file2 = 'gs://machinelearning-dc-bucket/input/vector_test_converted.csv'
-    pickle_file = 'gs://machinelearning-dc-bucket/input/lexikon.pickle'
-    checkpoint_file = 'gs://machinelearning-dc-bucket/output/model.ckpt'
+    hidden_1_layer = {'f_fum': n_nodes_hl1,
+                      'weight': tf.Variable(tf.random_normal([2638, n_nodes_hl1])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
+    hidden_2_layer = {'f_fum': n_nodes_hl2,
+                      'weight': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl2]))}
 
-    prediction = neural_network(x)
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+    hidden_3_layer = {'f_fum': n_nodes_hl3,
+                      'weight': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl3]))}
+
+    output_layer = {'f_fum': None,
+                    'weight': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
+                    'bias': tf.Variable(tf.random_normal([n_classes])), }
+
+    # Nothing changes
+    def neural_network_model(data):
+        l1 = tf.add(tf.matmul(data, hidden_1_layer['weight']), hidden_1_layer['bias'])
+        l1 = tf.nn.relu(l1)
+
+        l2 = tf.add(tf.matmul(l1, hidden_2_layer['weight']), hidden_2_layer['bias'])
+        l2 = tf.nn.relu(l2)
+
+        l3 = tf.add(tf.matmul(l2, hidden_3_layer['weight']), hidden_3_layer['bias'])
+        l3 = tf.nn.relu(l3)
+
+        output = tf.matmul(l3, output_layer['weight']) + output_layer['bias']
+
+        return output
+
+    saver = tf.train.Saver()
+    tf_log = 'tf.log'
+
+    prediction = neural_network_model(x)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        try:
-            epoche = int(open(tf_log, 'r').read().split('\n')[-2]) + 1
-            print('START:', epoche)
-        except:
-            epoche = 1
-        while epoche <= epochen:
-            if epoche != 1:
-                saver.restore(sess, checkpoint_file)
-            epoch_loss = 1
 
-            with file_io.FileIO(pickle_file, mode='r+') as f:
-                lexikon = pickle.load(f)
-            with io.open(csv_file1, buffering=20000, encoding='latin-1') as f:
+        writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
+        print('Start Training')
+        try:
+            epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
+            print('START:',epoch)
+        except:
+            epoch = 1
+
+        while epoch <= hm_epochs:
+            if epoch != 1:
+                saver.restore(sess,"model.ckpt")
+
+            epoch_loss = 1
+            with tf.gfile.Open(csv_file, 'rb') as gcs_file:
+                lines=gcs_file.readlines()
+
                 zaehler = 0
-                for zeile in f:
+                for zeile in lines:
+                    zaehler += 1
                     label = zeile.split(':::')[0]
                     tweet = zeile.split(':::')[1]
                     woerter = word_tokenize(tweet.lower())
@@ -83,47 +108,78 @@ def trainDNN(x):
                         if wort.lower() in lexikon:
                             indexWert = lexikon.index(wort.lower())
                             features[indexWert] += 1
+
                     batch_x = np.array([list(features)])
                     batch_y = np.array([eval(label)])
-                    #print(batch_x)
-                    #print(batch_y)
+
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
-                    zaehler+=1
-                    if zaehler < datenanzahl:
+
+
+
+                    if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
-                saver.save(sess,checkpoint_file)
-                print('Es sind', epoche, 'Epochen von', epochen, 'fertig,loss:', epoch_loss)
+                        break
 
-                with open(tf_log, 'a') as f:
-                    f.write(str(epoche) + '\n')
-                epoche += 1
-                correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-                accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-                feature_sets = []
-                labels = []
-                zaehler = 0
-                with open(csv_file2, buffering=20000) as f:
-                    for zeile in f:
-                        try:
-                            features = list(eval(zeile.split('::')[0]))
-                            label = list(eval(zeile.split('::')[1]))
-                            feature_sets.append(features)
-                            labels.append(label)
-                            zaehler += 1
-                        except:
-                            pass
-                print('Getestet:', zaehler)
-                test_x = np.array(feature_sets)
-                test_y = np.array(labels)
-                print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
+            saver.save(sess, "model.ckpt")
+            print('Es ist/sind', epoch, 'Epoche/n von', hm_epochs, 'fertig,loss:', epoch_loss)
 
+            epoch += 1
+            with open(tf_log, 'a') as f:
+                f.write(str(epoch) + '\n')
 
-def main(_):
-    trainDNN(x)
+        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+
+        feature_sets = []
+        labels = []
+        zaehler = 0
+
+        with tf.gfile.Open(csv_file2, 'rb') as gc_file:
+            lines2 = gc_file.readlines()
+
+            for zeile in lines2:
+                try:
+                    features = list(eval(zeile.split('::')[0]))
+                    label = list(eval(zeile.split('::')[1]))
+                    feature_sets.append(features)
+                    labels.append(label)
+                    zaehler += 1
+                except:
+                    pass
+        print('Getestet:', zaehler)
+        test_x = np.array(feature_sets)
+        test_y = np.array(labels)
+        writer.flush()
+        print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    parser = argparse.ArgumentParser()
+    # Input Arguments
+    parser.add_argument(
+        '--train-file',
+        help='GCS or local paths to training data',
+        required=True
+    )
+    parser.add_argument(
+        '--job-dir',
+        help='GCS location to write checkpoints and export models',
+        required=True
+    )
+    parser.add_argument('--csv-file',
+                        help='csv file',
+                        required =True)
+    parser.add_argument('--csv-file2',
+                        help='csv file2',
+                        required=True)
+    parser.add_argument('--checkpoint',
+                        help='checkpointfile',
+                        required=True)
+
+    args = parser.parse_args()
+    arguments = args.__dict__
+
+    trainDNN(**arguments)
 
 
