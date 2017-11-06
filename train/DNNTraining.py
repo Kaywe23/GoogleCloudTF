@@ -118,7 +118,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     _, c = sess.run([optimizer, cost], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     epoch_loss += c
 
-                    writer.add_summary(c, epoch * zaehler + zeile)
+                    writer.add_summary(c, epoch * datenanzahl + zaehler)
 
                     if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'daten verarbeitet')
