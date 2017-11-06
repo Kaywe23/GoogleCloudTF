@@ -76,7 +76,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
     prediction = neural_network_model(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
-    tf.scalar_summary("cost", cost)
+    tf.summary.scalar("cost", cost)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
@@ -133,7 +133,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        tf.scalar_summary("accuracy", accuracy)
+        tf.summary.scalar("accuracy", accuracy)
         feature_sets = []
         labels = []
         zaehler = 0
@@ -151,7 +151,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                 except:
                     pass
 
-        summary_op = tf.merge_all_summaries()
+        summary_op = tf.summary.merge_all()
 
 
         # write log
