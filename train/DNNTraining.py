@@ -71,7 +71,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         return output
 
     saver = tf.train.Saver()
-    tf_log = 'tf.log'
+    #tf_log = 'tf.log'
 
     prediction = neural_network_model(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
@@ -82,11 +82,11 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
         writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
-        try:
-            epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
-            print('START:',epoch)
-        except:
-            epoch = 1
+        #try:
+            #epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
+            #print('START:',epoch)
+        #except:
+        epoch = 1
 
         while epoch <= hm_epochs:
             if epoch != 1:
@@ -125,8 +125,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
             print('Es ist/sind', epoch, 'Epoche/n von', hm_epochs, 'fertig,loss:', epoch_loss)
 
             epoch += 1
-            with open(tf_log, 'a') as f:
-                f.write(str(epoch) + '\n')
+            #with open(tf_log, 'a') as f:
+                #f.write(str(epoch) + '\n')
 
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
