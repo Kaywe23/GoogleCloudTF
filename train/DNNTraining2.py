@@ -24,8 +24,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 2
-datenanzahl = 100
+hm_epochs = 20
+datenanzahl = 20000
 display_step = 1
 
 
@@ -99,7 +99,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         for epoch in range(hm_epochs):
 
             saver.restore(sess,checkpoint)
-            avg_cost=0
+            avg_cost=0.
             batch_count=int(datenanzahl)
 
             with tf.gfile.Open(csv_file, 'rb') as gcs_file:
