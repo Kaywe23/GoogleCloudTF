@@ -98,7 +98,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         for epoch in range(hm_epochs):
 
             saver.restore(sess,checkpoint)
-            avg_cost
+            avg_cost=0
             epoch_loss=1
             batch_count=int(datenanzahl)
 
