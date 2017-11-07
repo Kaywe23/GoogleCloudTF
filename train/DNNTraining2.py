@@ -24,11 +24,46 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 20
-datenanzahl = 20000
+hm_epochs = 15
+datenanzahl = 10000
 display_step = 1
 
+x = tf.placeholder('float')
+y = tf.placeholder('float')
 
+hidden_1_layer = {'f_fum': n_nodes_hl1,
+                      'weight': tf.Variable(tf.random_normal([2638, n_nodes_hl1])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl1]))}
+
+hidden_2_layer = {'f_fum': n_nodes_hl2,
+                      'weight': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl2]))}
+
+hidden_3_layer = {'f_fum': n_nodes_hl3,
+                      'weight': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
+                      'bias': tf.Variable(tf.random_normal([n_nodes_hl3]))}
+
+output_layer = {'f_fum': None,
+                    'weight': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
+                    'bias': tf.Variable(tf.random_normal([n_classes])), }
+
+
+def neural_network_model(data):
+    l1 = tf.add(tf.matmul(data, hidden_1_layer['weight']), hidden_1_layer['bias'])
+    l1 = tf.nn.relu(l1)
+
+    l2 = tf.add(tf.matmul(l1, hidden_2_layer['weight']), hidden_2_layer['bias'])
+    l2 = tf.nn.relu(l2)
+
+    l3 = tf.add(tf.matmul(l2, hidden_3_layer['weight']), hidden_3_layer['bias'])
+    l3 = tf.nn.relu(l3)
+
+    output = tf.matmul(l3, output_layer['weight']) + output_layer['bias']
+
+    return output
+
+saver = tf.train.Saver()
+#tf_log = 'tf.log'
 
 
 def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
@@ -38,56 +73,20 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
-    x = tf.placeholder('float')
-    y = tf.placeholder('float')
-
-    hidden_1_layer = {'f_fum': n_nodes_hl1,
-                      'weight': tf.Variable(tf.random_normal([2638, n_nodes_hl1])),
-                      'bias': tf.Variable(tf.random_normal([n_nodes_hl1]))}
-
-    hidden_2_layer = {'f_fum': n_nodes_hl2,
-                      'weight': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
-                      'bias': tf.Variable(tf.random_normal([n_nodes_hl2]))}
-
-    hidden_3_layer = {'f_fum': n_nodes_hl3,
-                      'weight': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
-                      'bias': tf.Variable(tf.random_normal([n_nodes_hl3]))}
-
-    output_layer = {'f_fum': None,
-                    'weight': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
-                    'bias': tf.Variable(tf.random_normal([n_classes])), }
-
-    # Nothing changes
-    def neural_network_model(data):
-        l1 = tf.add(tf.matmul(data, hidden_1_layer['weight']), hidden_1_layer['bias'])
-        l1 = tf.nn.relu(l1)
-
-        l2 = tf.add(tf.matmul(l1, hidden_2_layer['weight']), hidden_2_layer['bias'])
-        l2 = tf.nn.relu(l2)
-
-        l3 = tf.add(tf.matmul(l2, hidden_3_layer['weight']), hidden_3_layer['bias'])
-        l3 = tf.nn.relu(l3)
-
-        output = tf.matmul(l3, output_layer['weight']) + output_layer['bias']
-
-        return output
-
-    saver = tf.train.Saver()
-    #tf_log = 'tf.log'
 
     prediction = neural_network_model(x)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
     correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+    optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
     cost_summary = tf.summary.scalar("cost", cost)
     acc_summary = tf.summary.scalar("accuracy", accuracy)
     summary_op = tf.summary.merge_all()
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
         writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
         #try:
@@ -98,7 +97,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         epoch = 1
         for epoch in range(hm_epochs):
 
-            saver.restore(sess,checkpoint)
+            #saver.restore(sess,checkpoint)
             avg_cost=0.
             batch_count=int(datenanzahl)
 
@@ -134,7 +133,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
                 print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost)
 
-            saver.save(sess, checkpoint)
+            #saver.save(sess, checkpoint)
 
             #with open(tf_log, 'a') as f:
                 #f.write(str(epoch) + '\n')
