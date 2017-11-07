@@ -121,25 +121,21 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     batch_x = np.array([list(features)])
                     batch_y = np.array([eval(label)])
 
+                    _, c, summary = sess.run([optimizer, cost, summary_op],
+                                             feed_dict={x: batch_x, y: batch_y})
+                    writer.add_summary(summary, epoch * datenanzahl + zaehler)
+                    avg_cost += c / datenanzahl
+
                     if zaehler > datenanzahl:
-                        print('Es wurden', datenanzahl, 'Daten verarbeitet')
+                        print "Batch mit", datenanzahl, "Daten durchlaufen!"
                         break
-
-                    _,summary = sess.run([optimizer, summary_op],
-                                             feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-
-                    writer.add_summary(summary, 0)
-                    
-                    for _i in range(batch_count):
-                        avg_cost += sess.run(cost, feed_dict={x: np.array(batch_x), y: np.array(batch_y)}) / batch_count
-
 
             if epoch % display_step == 0:
 
                 print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost)
 
             saver.save(sess, checkpoint)
-            epoch += 1
+
             #with open(tf_log, 'a') as f:
                 #f.write(str(epoch) + '\n')
 
@@ -164,11 +160,11 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     pass
 
 
-        print('Getestet:', zaehler)
+        print'Getestet:', zaehler
         test_x = np.array(feature_sets)
         test_y = np.array(labels)
         writer.flush()
-        print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
+        print'Accuracy:', accuracy.eval({x: test_x, y: test_y})
 
 
 if __name__ == '__main__':
