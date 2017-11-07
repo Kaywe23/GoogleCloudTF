@@ -128,10 +128,11 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     _,summary = sess.run([optimizer, summary_op],
                                              feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
 
-
+                    writer.add_summary(summary, 0)
+                    
                     for _i in range(batch_count):
                         avg_cost += sess.run(cost, feed_dict={x: np.array(batch_x), y: np.array(batch_y)}) / batch_count
-                        writer.add_summary(summary, epoch * batch_count + _i)
+
 
             if epoch % display_step == 0:
 
