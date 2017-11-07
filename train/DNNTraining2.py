@@ -25,7 +25,7 @@ n_nodes_hl3 = 1500
 n_classes = 2
 batch_size = 100
 hm_epochs = 15
-datenanzahl = 10000
+datenanzahl = 2000000
 display_step = 1
 
 x = tf.placeholder('float')
@@ -121,19 +121,19 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     batch_y = np.array([eval(label)])
 
                     _, c, summary = sess.run([optimizer, cost, summary_op],
-                                             feed_dict={x: batch_x, y: batch_y})
+                                             feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
                     writer.add_summary(summary, epoch * datenanzahl + zaehler)
                     avg_cost += c / datenanzahl
 
                     if zaehler > datenanzahl:
                         print "Batch mit", datenanzahl, "Daten durchlaufen!"
                         break
-
+            # saver.save(sess, checkpoint)
             if epoch % display_step == 0:
 
                 print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost)
 
-            #saver.save(sess, checkpoint)
+
 
             #with open(tf_log, 'a') as f:
                 #f.write(str(epoch) + '\n')
