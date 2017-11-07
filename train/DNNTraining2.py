@@ -124,14 +124,18 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     if zaehler > datenanzahl:
                         print('Es wurden', datenanzahl, 'Daten verarbeitet')
                         break
-            for _i in range(batch_count):
-                _,c, summary = sess.run([optimizer,cost, summary_op], feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                epoch_loss += c
-                avg_cost += sess.run(cost, feed_dict={x: np.array(batch_x), y: np.array(batch_y)}) / batch_count
-                writer.add_summary(summary, epoch * batch_count + _i)
+
+                    _, c, summary = sess.run([optimizer, cost, summary_op],
+                                             feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
+                    epoch_loss += c
+
+                    for _i in range(batch_count):
+                        avg_cost += sess.run(cost, feed_dict={x: np.array(batch_x), y: np.array(batch_y)}) / batch_count
+                        writer.add_summary(summary, epoch * batch_count + _i)
+
             if epoch % display_step == 0:
 
-                print "Epoche:", '%04d' % (epoch), "cost=", "{:.9f}".format(avg_cost), "Loss=", "{:.9f}".format(epoch_loss)
+                print "Epoche:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost), "Loss=", "{:.9f}".format(epoch_loss)
 
             saver.save(sess, checkpoint)
             epoch += 1
