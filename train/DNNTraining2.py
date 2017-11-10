@@ -75,17 +75,26 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
+    with tf.name_scope('Model'):
+        # Model
+        prediction = neural_network_model(x)
+    with tf.name_scope('Loss'):
+        # Minimize error using cross entropy
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+    with tf.name_scope('AO'):
+        # Gradient Descent
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+    with tf.name_scope('Accuracy'):
+        # Accuracy
+        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-    prediction = neural_network_model(x)
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels= y))
-    correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+    init = tf.global_variables_initializer()
 
     cost_summary = tf.summary.scalar("cost", cost)
     acc_summary = tf.summary.scalar("accuracy", accuracy)
-    summary_op = tf.summary.merge_all()
 
+    summary_op = tf.summary.merge_all()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -130,7 +139,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     if zaehler > datenanzahl:
                         print "Batch mit", datenanzahl, "Daten durchlaufen!"
                         break
-            # saver.save(sess, checkpoint)
+            saver.save(sess, checkpoint)
             if epoch % display_step == 0:
 
                 print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost)
@@ -139,9 +148,6 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
             #with open(tf_log, 'a') as f:
                 #f.write(str(epoch) + '\n')
-
-        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
         feature_sets = []
         labels = []
