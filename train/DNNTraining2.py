@@ -16,16 +16,18 @@ reload(sys)
 sys.setdefaultencoding('latin-1')
 
 lemmatizer = WordNetLemmatizer()
+#flags = tf.app.flags
 
-
+#flags.DEFINE_integer('hm_epochs',5,'Anzahl epochen')
+#FLAGS = flags.FLAGS
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
 n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 15
-datenanzahl = 2000000
+hm_epochs = 4
+datenanzahl = 100
 display_step = 1
 
 x = tf.placeholder('float')
