@@ -26,7 +26,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 1
+hm_epochs = 2
 datenanzahl = 100
 display_step = 1
 
@@ -94,7 +94,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
     cost_summary = tf.summary.scalar("cost", cost)
     acc_summary = tf.summary.scalar("accuracy", accuracy)
 
-    summary_op = tf.summary.merge_all()
+    #summary_op = tf.summary.merge_all()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -131,9 +131,10 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     batch_x = np.array([list(features)])
                     batch_y = np.array([eval(label)])
 
-                    _, c, summary = sess.run([optimizer, cost, summary_op],
+                    _, c, train_acc, cost_summary, acc_summary = sess.run([optimizer, cost, accuracy, cost_summary, acc_summary],
                                              feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                    writer.add_summary(summary, epoch * datenanzahl + zaehler)
+                    writer.add_summary(cost_summary, epoch * datenanzahl + zaehler)
+                    writer.add_summary(acc_summary, epoch * datenanzahl + zaehler)
                     avg_cost += c / datenanzahl
 
                     if zaehler > datenanzahl:
@@ -142,7 +143,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
             saver.save(sess, checkpoint)
             if epoch % display_step == 0:
 
-                print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost)
+                print "Epoch:", '%04d' % (epoch+1),"of",'%04d' % (hm_epochs), "cost=", "{:.9f}".format(avg_cost),\
+                    "train_acc=", "{:.9f}".format(train_acc)
 
 
 
