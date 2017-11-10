@@ -26,7 +26,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 4
+hm_epochs = 1
 datenanzahl = 100
 display_step = 1
 
@@ -65,7 +65,7 @@ def neural_network_model(data):
     return output
 
 saver = tf.train.Saver()
-#tf_log = 'tf.log'
+tf_log = 'tf.log'
 
 
 def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
@@ -100,15 +100,15 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
-        #try:
-            #epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
-            #print('START:',epoch)
-        #except:
+        try:
+            epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
+            print('START:',epoch)
+        except:
 
-        epoch = 1
+            epoch = 1
         for epoch in range(hm_epochs):
 
-            #saver.restore(sess,checkpoint)
+            saver.restore(sess,checkpoint)
             avg_cost=0.
             batch_count=int(datenanzahl)
 
@@ -146,8 +146,8 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
 
 
-            #with open(tf_log, 'a') as f:
-                #f.write(str(epoch) + '\n')
+            with open(tf_log, 'a') as f:
+                f.write(str(epoch) + '\n')
 
         feature_sets = []
         labels = []
