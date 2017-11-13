@@ -83,7 +83,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     with tf.name_scope('AO'):
         # Gradient Descent
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(cost)
     with tf.name_scope('Accuracy'):
         # Accuracy
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
@@ -98,7 +98,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
+        summary_writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
         try:
             epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
@@ -131,9 +131,16 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     batch_x = np.array([list(features)])
                     batch_y = np.array([eval(label)])
 
-                    _, c, summary = sess.run([optimizer, cost, summary_op],
+                    _, c = sess.run([optimizer, cost],
                                              feed_dict={x: np.array(batch_x), y: np.array(batch_y)})
-                    writer.add_summary(summary, epoch * datenanzahl + zaehler)
+
+                    if zaehler % 100 == 0:
+                        summary_str = sess.run(summary_op,
+                                               feed_dict={x: batch_x,y: batch_y})
+                        summary_writer.add_summary(summary_str, zaehler)
+                        summary_writer.flush()
+
+                    #writer.add_summary(summary, epoch * datenanzahl + zaehler)
 
                     avg_cost += c / datenanzahl
 
@@ -172,7 +179,6 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         print'Getestet:', zaehler
         test_x = np.array(feature_sets)
         test_y = np.array(labels)
-        writer.flush()
         print'Accuracy:', accuracy.eval({x: test_x, y: test_y})
 
 
