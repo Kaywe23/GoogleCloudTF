@@ -26,8 +26,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 15
-datenanzahl = 500000
+hm_epochs = 1
+datenanzahl = 100
 display_step = 1
 
 x = tf.placeholder('float')
