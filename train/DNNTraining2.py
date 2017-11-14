@@ -26,8 +26,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 20
-datenanzahl = 10000
+hm_epochs = 1
+datenanzahl = 100
 display_step = 1
 
 x = tf.placeholder('float')
@@ -69,8 +69,8 @@ tf_log = 'tf.log'
 
 
 def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
-                         csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTrainingLite',
-                         checkpoint='model.ckpt',**args):
+                         csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTraining2',
+                         checkpoint='model.ckpt',logs='tf.log',**args):
 
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
@@ -100,15 +100,15 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         sess.run(tf.global_variables_initializer())
         summary_writer = tf.summary.FileWriter(job_dir, graph=tf.get_default_graph())
         print('Start Training')
-        #try:
-            #epoch = int(open(tf_log,'r').read().split('\n')[-2])+1
-            #print('START:',epoch)
-        #except:
+        try:
+            epoch = int(tf.gfile.Open(logs,'r').read().split('\n')[-2])+1
+            print('START:',epoch)
+        except:
 
-        epoch = 1
+            epoch = 1
         for epoch in range(hm_epochs):
-
-            #saver.restore(sess,checkpoint)
+            if epoch != 1:
+                saver.restore(sess,checkpoint)
             avg_cost=0.
             batch_count=int(datenanzahl)
 
@@ -137,7 +137,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
                     if zaehler % 100 == 0:
                         summary_str = sess.run(summary_op,
                                                feed_dict={x: batch_x,y: batch_y})
-                        summary_writer.add_summary(summary_str, zaehler)
+                        summary_writer.add_summary(summary_str, epoch*datenanzahl + zaehler)
                         summary_writer.flush()
 
                     #writer.add_summary(summary, epoch * datenanzahl + zaehler)
@@ -155,7 +155,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
 
 
-            with open(tf_log, 'a') as f:
+            with tf.gile.Open(logs, 'a') as f:
                 f.write(str(epoch) + '\n')
 
         feature_sets = []
