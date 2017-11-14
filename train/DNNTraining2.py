@@ -26,8 +26,8 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 1
-datenanzahl = 100
+hm_epochs = 15
+datenanzahl = 10000
 display_step = 1
 
 x = tf.placeholder('float')
@@ -83,7 +83,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     with tf.name_scope('AO'):
         # Gradient Descent
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost)
     with tf.name_scope('Accuracy'):
         # Accuracy
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
