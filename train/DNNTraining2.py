@@ -65,7 +65,7 @@ def neural_network_model(data):
     return output
 
 saver = tf.train.Saver()
-tf_log = 'tf.log'
+
 
 
 def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.csv',
@@ -155,7 +155,7 @@ def trainDNN(train_file='lexikon2.pickle',csv_file='train_converted_vermischt.cs
 
 
 
-            with tf.gile.Open(logs, 'a') as f:
+            with tf.gfile.Open(logs, 'a') as f:
                 f.write(str(epoch) + '\n')
 
         feature_sets = []
@@ -204,7 +204,9 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint',
                         help='checkpointfile',
                         required=True)
-
+    parser.add_argument('--logs',
+                        help='logfile',
+                        required=True)
     args = parser.parse_args()
     arguments = args.__dict__
 
