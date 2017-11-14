@@ -26,7 +26,7 @@ n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 100
-hm_epochs = 5
+hm_epochs = 50
 datenanzahl = 10000
 display_step = 1
 
