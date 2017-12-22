@@ -79,12 +79,12 @@ with graph.as_default():
 
     with tf.name_scope('train'):
         # Gradient Descent
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost)
+        #optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost)
         # Decaying learning rate
-        #global_step = tf.Variable(0)  # count the number of steps taken.
-        #start_learning_rate = 0.001
-        #learning_rate = tf.train.exponential_decay(start_learning_rate, global_step, 100000, 0.96, staircase=True)
-        #optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost, global_step=global_step)
+        global_step = tf.Variable(0)  # count the number of steps taken.
+        start_learning_rate = 0.001
+        learning_rate = tf.train.exponential_decay(start_learning_rate, global_step, 100000, 0.96, staircase=True)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
     with tf.name_scope('Softmax'):
         # Predictions for the training
