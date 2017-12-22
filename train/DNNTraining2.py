@@ -105,7 +105,7 @@ with graph.as_default():
 
 def trainDNN(train_file='lexikon2.pickle', csv_file='train_converted_vermischt.csv',
              csv_file2='vector_test_converted.csv', job_dir='./tmp/DNNTraining2',
-             checkpoint='model.ckpt', logs='tf.log', **args):
+             checkpoint='model_0.ckpt', logs='tf.log', **args):
     file_stream = file_io.FileIO(train_file, mode='r')
     lexikon = pickle.load(file_stream)
 
@@ -136,16 +136,16 @@ def trainDNN(train_file='lexikon2.pickle', csv_file='train_converted_vermischt.c
         writer = tf.summary.FileWriter(job_dir, graph=graph)
         print('Start Training')
 
-        try:
-            epoch = int(tf.gfile.Open(tf_log,'r').read().split('\n')[-2])+1
-            print('START:',epoch)
-        except:
-            epoch=1
+        #try:
+            #epoch = int(tf.gfile.Open(tf_log,'r').read().split('\n')[-2])+1
+            #print('START:',epoch)
+        #except:
+        epoch=1
 
         for epoch in range(hm_epochs):
             t1=clock()
-            if epoch != 1:
-                saver.restore(sess, checkpoint)
+            #if epoch != 1:
+                #saver.restore(sess, checkpoint)
             avg_cost=0.
             avg_trainacc=0.
 
