@@ -13,6 +13,7 @@ import io
 import csv
 import pandas as pd
 import sys
+from time import *
 
 reload(sys)
 sys.setdefaultencoding('latin-1')
