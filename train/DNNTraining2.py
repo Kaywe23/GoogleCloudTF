@@ -47,7 +47,7 @@ with graph.as_default():
         biases_2 = tf.Variable(tf.random_normal([hidden_nodes_2]))
         biases_3 = tf.Variable(tf.random_normal([n_classes]))
 
-    with tf.name_scope('deep neural net'):
+    with tf.name_scope('deep_neural_net'):
 
         # Hidden RELU layer 1
         logits_1 = tf.matmul(tf_train_dataset, weights_1) + biases_1
