@@ -132,7 +132,7 @@ def trainDNN(train_file='lexikon2.pickle', csv_file='train_converted_vermischt.c
         tf.global_variables_initializer().run()
         print("Initialized")
 
-        writer = tf.summary.FileWriter(logs_path, graph=graph)
+        writer = tf.summary.FileWriter(job_dir, graph=graph)
         print('Start Training')
 
         try:
