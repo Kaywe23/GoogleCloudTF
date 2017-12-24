@@ -27,7 +27,7 @@ beta=0.001
 n_classes = 2
 batch_size = 100
 hm_epochs = 20
-batch_count = 100000
+batch_count = 500000
 display_step = 1
 
 
