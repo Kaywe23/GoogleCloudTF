@@ -26,8 +26,8 @@ hidden_nodes_2 = int(hidden_nodes_1 * 0.5)
 beta=0.001
 n_classes = 2
 batch_size = 100
-hm_epochs = 50
-batch_count = 100000
+hm_epochs = 10
+batch_count = 1000000
 display_step = 1
 
 
